@@ -89,7 +89,8 @@ async function exchangeCodeForToken(code, codeVerifier) {
     redirect_uri: process.env.ML_REDIRECT_URI,
     code_verifier: codeVerifier
   });
-
+  console.log('--- PKCE STEP 3 ---');
+  console.log('Sending code_verifier:', codeVerifier);
   const response = await fetch('https://api.mercadolibre.com/oauth/token', {
     method: 'POST',
     headers: {
@@ -322,10 +323,15 @@ app.get('/auth/mercadolivre', (req, res) => {
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
+  console.log('--- PKCE STEP 1 ---');
+  console.log('code_verifier:', codeVerifier);
+  console.log('code_challenge:', codeChallenge);
+
   req.session.meli_oauth_state = state;
   req.session.meli_code_verifier = codeVerifier;
 
   const authUrl = buildMeliAuthUrl(state, codeChallenge);
+  console.log('Auth URL:', authUrl);
   res.redirect(authUrl);
 });
 
@@ -344,7 +350,8 @@ app.get('/auth', async (req, res) => {
     if (!state || state !== req.session.meli_oauth_state) {
       return res.status(400).send('State inválido.');
     }
-
+    console.log('--- PKCE STEP 2 ---');
+    console.log('Session code_verifier:', req.session.meli_code_verifier);
     const codeVerifier = req.session.meli_code_verifier;
 
     if (!codeVerifier) {
