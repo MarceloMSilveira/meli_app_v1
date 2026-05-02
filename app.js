@@ -49,25 +49,45 @@ async function writeDb(data) {
   await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
 }
 
-function buildMeliAuthUrl(state) {
+function base64UrlEncode(buffer) {
+  return buffer
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+function generateCodeVerifier() {
+  return base64UrlEncode(crypto.randomBytes(32));
+}
+
+function generateCodeChallenge(codeVerifier) {
+  return base64UrlEncode(
+    crypto.createHash('sha256').update(codeVerifier).digest()
+  );
+}
+
+function buildMeliAuthUrl(state, codeChallenge) {
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: process.env.ML_CLIENT_ID,
     redirect_uri: process.env.ML_REDIRECT_URI,
-    state
+    state,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256'
   });
 
-  // Brasil
   return `https://auth.mercadolivre.com.br/authorization?${params.toString()}`;
 }
 
-async function exchangeCodeForToken(code) {
+async function exchangeCodeForToken(code, codeVerifier) {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: process.env.ML_CLIENT_ID,
     client_secret: process.env.ML_CLIENT_SECRET,
     code,
-    redirect_uri: process.env.ML_REDIRECT_URI
+    redirect_uri: process.env.ML_REDIRECT_URI,
+    code_verifier: codeVerifier
   });
 
   const response = await fetch('https://api.mercadolibre.com/oauth/token', {
@@ -298,9 +318,14 @@ app.get('/', async (req, res) => {
 
 app.get('/auth/mercadolivre', (req, res) => {
   const state = crypto.randomUUID();
-  req.session.meli_oauth_state = state;
 
-  const authUrl = buildMeliAuthUrl(state);
+  const codeVerifier = generateCodeVerifier();
+  const codeChallenge = generateCodeChallenge(codeVerifier);
+
+  req.session.meli_oauth_state = state;
+  req.session.meli_code_verifier = codeVerifier;
+
+  const authUrl = buildMeliAuthUrl(state, codeChallenge);
   res.redirect(authUrl);
 });
 
@@ -320,7 +345,21 @@ app.get('/auth', async (req, res) => {
       return res.status(400).send('State inválido.');
     }
 
-    const tokenData = await exchangeCodeForToken(code);
+    const codeVerifier = req.session.meli_code_verifier;
+
+    if (!codeVerifier) {
+      return res.status(400).send('Code verifier ausente na sessão.');
+    }
+
+    let tokenData;
+
+    try {
+      tokenData = await exchangeCodeForToken(code, codeVerifier);
+    } finally {
+      delete req.session.meli_oauth_state;
+      delete req.session.meli_code_verifier;
+    }
+
     const userData = await getMeliUserMe(tokenData.access_token);
 
     const account = {
