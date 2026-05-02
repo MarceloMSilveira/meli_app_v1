@@ -2,16 +2,22 @@ import 'dotenv/config';
 import express from 'express';
 import session from 'express-session';
 import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import pg from 'pg'
+
+const {Pool} = pg
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: false
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DB_FILE = path.join(__dirname, 'db.json');
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -31,23 +37,7 @@ app.use(
   })
 );
 
-async function ensureDb() {
-  try {
-    await fs.access(DB_FILE);
-  } catch {
-    await fs.writeFile(DB_FILE, JSON.stringify({ accounts: [] }, null, 2));
-  }
-}
 
-async function readDb() {
-  await ensureDb();
-  const raw = await fs.readFile(DB_FILE, 'utf-8');
-  return JSON.parse(raw);
-}
-
-async function writeDb(data) {
-  await fs.writeFile(DB_FILE, JSON.stringify(data, null, 2));
-}
 
 function base64UrlEncode(buffer) {
   return buffer
@@ -178,29 +168,60 @@ function computeExpiresAt(expiresInSeconds) {
 }
 
 async function saveOrUpdateAccount(account) {
-  const db = await readDb();
-  const index = db.accounts.findIndex(a => a.meli_user_id === account.meli_user_id);
-
-  if (index >= 0) {
-    db.accounts[index] = {
-      ...db.accounts[index],
-      ...account,
-      updated_at: new Date().toISOString()
-    };
-  } else {
-    db.accounts.push({
-      ...account,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    });
-  }
-
-  await writeDb(db);
+  await pool.query(
+    `
+    INSERT INTO accounts (
+      meli_user_id,
+      nickname,
+      email,
+      country_id,
+      site_id,
+      access_token,
+      refresh_token,
+      token_type,
+      scope,
+      expires_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+    ON CONFLICT (meli_user_id)
+    DO UPDATE SET
+      nickname = EXCLUDED.nickname,
+      email = EXCLUDED.email,
+      country_id = EXCLUDED.country_id,
+      site_id = EXCLUDED.site_id,
+      access_token = EXCLUDED.access_token,
+      refresh_token = EXCLUDED.refresh_token,
+      token_type = EXCLUDED.token_type,
+      scope = EXCLUDED.scope,
+      expires_at = EXCLUDED.expires_at,
+      updated_at = NOW()
+    `,
+    [
+      String(account.meli_user_id),
+      account.nickname,
+      account.email,
+      account.country_id,
+      account.site_id,
+      account.access_token,
+      account.refresh_token,
+      account.token_type,
+      account.scope,
+      account.expires_at
+    ]
+  );
 }
 
 async function findAccountByMeliUserId(meliUserId) {
-  const db = await readDb();
-  return db.accounts.find(a => String(a.meli_user_id) === String(meliUserId));
+  const result = await pool.query(
+    `
+    SELECT *
+    FROM accounts
+    WHERE meli_user_id = $1
+    `,
+    [String(meliUserId)]
+  );
+
+  return result.rows[0];
 }
 
 async function getValidAccessTokenForUser(meliUserId) {
@@ -217,7 +238,9 @@ async function getValidAccessTokenForUser(meliUserId) {
   if (expiresAtMs > now + marginMs) {
     return account.access_token;
   }
-
+  if (!account.refresh_token) {
+    throw new Error('Conta sem refresh_token. Reconectar necessário.');
+  }
   const refreshed = await refreshAccessToken(account.refresh_token);
 
   const updatedAccount = {
@@ -235,13 +258,13 @@ async function getValidAccessTokenForUser(meliUserId) {
 }
 
 async function deleteAccountByMeliUserId(meliUserId) {
-  const db = await readDb();
-
-  db.accounts = db.accounts.filter(
-    account => String(account.meli_user_id) !== String(meliUserId)
+  await pool.query(
+    `
+    DELETE FROM accounts
+    WHERE meli_user_id = $1
+    `,
+    [String(meliUserId)]
   );
-
-  await writeDb(db);
 }
 
 //funcões adicionais para conexão com apps script
@@ -323,8 +346,18 @@ async function sendProductsToAppsScript(products) {
 
 
 app.get('/', async (req, res) => {
-  const db = await readDb();
-  res.render('home', { accounts: db.accounts });
+  try {
+    const result = await pool.query(`
+      SELECT *
+      FROM accounts
+      ORDER BY created_at DESC
+    `);
+
+    res.render('home', { accounts: result.rows });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send(`Erro ao carregar contas: ${err.message}`);
+  }
 });
 
 app.get('/auth/mercadolivre', (req, res) => {
@@ -406,7 +439,13 @@ app.get('/auth', async (req, res) => {
 app.get('/accounts/:meliUserId/test', async (req, res) => {
   try {
     const { meliUserId } = req.params;
-    const accessToken = await getValidAccessTokenForUser(meliUserId);
+    try {
+      const accessToken = await getValidAccessTokenForUser(meliUserId);
+    } catch (err) {
+      if (err.message.includes('refresh_token')) {
+        return res.send('Sua sessão expirou. Por favor, reconecte sua conta.');
+      }
+    }
 
     const response = await fetch('https://api.mercadolibre.com/users/me', {
       headers: {
@@ -461,10 +500,18 @@ app.get('/accounts/:meliUserId/test', async (req, res) => {
 
 //retornando html:
 app.post('/accounts/:meliUserId/sync-google-sheet', async (req, res) => {
+  let accessToken = ''
   try {
     const { meliUserId } = req.params;
 
-    const accessToken = await getValidAccessTokenForUser(meliUserId);
+    try {
+      accessToken = await getValidAccessTokenForUser(meliUserId);
+    } catch (err) {
+      if (err.message.includes('refresh_token')) {
+        return res.send('Sua sessão expirou. Por favor, reconecte sua conta.');
+      }
+    }
+
     const products = await buildProductsPayload(accessToken, meliUserId);
 
     if (!products.length) {
