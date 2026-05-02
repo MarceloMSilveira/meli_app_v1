@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Integração Mercado Livre</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; }
+    .card { border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
+    .btn { display: inline-block; padding: 10px 14px; background: #3483fa; color: white; text-decoration: none; border-radius: 6px; }
+    .muted { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Integração com Mercado Livre</h1>
+
+  <p>
+    <a class="btn" href="/auth/mercadolivre">Conectar conta Mercado Livre</a>
+  </p>
+
+  <h2>Contas conectadas</h2>
+
+  <% if (!accounts.length) { %>
+    <p class="muted">Nenhuma conta conectada ainda.</p>
+  <% } %>
+
+  <% accounts.forEach(account => { %>
+    <div class="card">
+      <h3><%= account.nickname || 'Sem nickname' %></h3>
+      <p><strong>User ID:</strong> <%= account.meli_user_id %></p>
+      <p><strong>Email:</strong> <%= account.email || 'não informado' %></p>
+      <p><strong>País:</strong> <%= account.country_id || '-' %></p>
+      <p><strong>Site:</strong> <%= account.site_id || '-' %></p>
+      <p><strong>Expira em:</strong> <%= account.expires_at %></p>
+      
+      <p>
+        <a href="/accounts/<%= account.meli_user_id %>/test">
+          Testar /users/me com refresh automático
+        </a>
+      </p>
+
+      <form action="/accounts/<%= account.meli_user_id %>/sync-google-sheet" method="post" style="margin-top: 10px;">
+        <button type="submit" style="padding: 10px 14px; background: green; color: white; border: none; border-radius: 6px;">
+          Enviar produtos para Google Sheets
+        </button>
+      </form>
+    </div>
+  <% }) %>
+</body>
+</html>

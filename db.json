@@ -1,0 +1,32 @@
+{
+  "accounts": [
+    {
+      "meli_user_id": 3328019082,
+      "nickname": "TESTUSER7670301556417769625",
+      "email": "test_user_7670301556417769625@testuser.com",
+      "country_id": "BR",
+      "site_id": "MLB",
+      "access_token": "APP_USR-1455721652915192-042108-2e9fedbad7387077acc56bec4eddae88-3328019082",
+      "refresh_token": "TG-69e77307f6588700018f3773-3328019082",
+      "token_type": "Bearer",
+      "scope": "offline_access read urn:global:admin:info:/read-only urn:global:admin:info:/read-write urn:global:admin:oauth:/read-only urn:global:admin:oauth:/read-write urn:global:admin:users:/read-only urn:ml:all:comunication:/read-write urn:ml:all:publish-sync:/read-write urn:ml:mktp:ads:/read-write urn:ml:mktp:comunication:/read-write urn:ml:mktp:invoices:/read-write urn:ml:mktp:metrics:/read-only urn:ml:mktp:offers:/read-write urn:ml:mktp:orders-shipments:/read-write urn:ml:mktp:publish-sync:/read-write write",
+      "expires_at": "2026-04-21T18:52:26.622Z",
+      "created_at": "2026-04-15T20:05:35.340Z",
+      "updated_at": "2026-04-21T12:52:26.624Z"
+    },
+    {
+      "meli_user_id": 3020937729,
+      "nickname": "GDAFILIAL",
+      "email": "ecommercegda2@gmail.com",
+      "country_id": "BR",
+      "site_id": "MLB",
+      "access_token": "APP_USR-1455721652915192-042109-46618d6e34ddbcd3edaa1c939c7223f2-3020937729",
+      "refresh_token": "TG-69e7766627684a0001142fcf-3020937729",
+      "token_type": "Bearer",
+      "scope": "offline_access read urn:global:admin:info:/read-only urn:global:admin:info:/read-write urn:global:admin:oauth:/read-only urn:global:admin:oauth:/read-write urn:global:admin:users:/read-only urn:ml:all:comunication:/read-write urn:ml:all:publish-sync:/read-write urn:ml:mktp:ads:/read-write urn:ml:mktp:comunication:/read-write urn:ml:mktp:invoices:/read-write urn:ml:mktp:metrics:/read-only urn:ml:mktp:offers:/read-write urn:ml:mktp:orders-shipments:/read-write urn:ml:mktp:publish-sync:/read-write write",
+      "expires_at": "2026-04-21T19:06:49.557Z",
+      "created_at": "2026-04-21T13:06:49.558Z",
+      "updated_at": "2026-04-21T13:06:49.558Z"
+    }
+  ]
+}
