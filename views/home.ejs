@@ -4,17 +4,78 @@
   <meta charset="UTF-8" />
   <title>Integração Mercado Livre</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 900px; margin: 40px auto; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
     .card { border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-    .btn { display: inline-block; padding: 10px 14px; background: #3483fa; color: white; text-decoration: none; border-radius: 6px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      min-width: 220px;
+      height: 42px;
+      font-size: 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      color: white;
+      font: inherit;
+    }
     .muted { color: #666; }
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-danger:hover {
+      background: #bb2d3b;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .actions form {
+      margin: 0;
+    }
+
+    .btn-success {
+      background: #28a745;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-warning {
+      background: #c58f00;
+    }
+
+    .btn-warning:hover {
+      background: #a37500;
+    }
+
+    .btn-primary {
+      background: #3483fa;
+    }
+
+    .btn-primary:hover {
+      background: #2968c8;
+    }
+
   </style>
 </head>
 <body>
   <h1>Integração com Mercado Livre</h1>
 
   <p>
-    <a class="btn" href="/auth/mercadolivre">Conectar conta Mercado Livre</a>
+    <a class="btn btn-primary" href="/auth/mercadolivre">Conectar nova conta Mercado Livre</a>
   </p>
 
   <h2>Contas conectadas</h2>
@@ -38,11 +99,23 @@
         </a>
       </p>
 
-      <form action="/accounts/<%= account.meli_user_id %>/sync-google-sheet" method="post" style="margin-top: 10px;">
-        <button type="submit" style="padding: 10px 14px; background: green; color: white; border: none; border-radius: 6px;">
-          Enviar produtos para Google Sheets
-        </button>
-      </form>
+      <div class="actions">
+        <form action="/accounts/<%= account.meli_user_id %>/sync-google-sheet" method="post">
+          <button type="submit" class="btn btn-success">
+            Enviar produtos para Google Sheets
+          </button>
+        </form>
+
+        <form method="POST" action="/accounts/<%= account.meli_user_id %>/disconnect">
+          <button 
+            class="btn btn-warning"
+            type="submit"
+            onclick="return confirm('Tem certeza que deseja desconectar esta conta do Mercado Livre?')"
+          >
+            Desconectar
+          </button>
+        </form>
+      </div>
     </div>
   <% }) %>
 </body>

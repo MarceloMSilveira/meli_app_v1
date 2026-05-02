@@ -234,6 +234,16 @@ async function getValidAccessTokenForUser(meliUserId) {
   return updatedAccount.access_token;
 }
 
+async function deleteAccountByMeliUserId(meliUserId) {
+  const db = await readDb();
+
+  db.accounts = db.accounts.filter(
+    account => String(account.meli_user_id) !== String(meliUserId)
+  );
+
+  await writeDb(db);
+}
+
 //funcões adicionais para conexão com apps script
 
 async function mlApiFetch(path, accessToken) {
@@ -477,6 +487,25 @@ app.post('/accounts/:meliUserId/sync-google-sheet', async (req, res) => {
     console.error(err);
     return res.status(500).send(`
       <h1>Erro na sincronização</h1>
+      <p>${err.message}</p>
+      <p><a href="/">Voltar</a></p>
+    `);
+  }
+});
+
+//rota para desconectar:
+app.post('/accounts/:meliUserId/disconnect', async (req, res) => {
+  try {
+    const { meliUserId } = req.params;
+
+    await deleteAccountByMeliUserId(meliUserId);
+
+    return res.redirect('/');
+  } catch (err) {
+    console.error(err);
+
+    return res.status(500).send(`
+      <h1>Erro ao desconectar conta</h1>
       <p>${err.message}</p>
       <p><a href="/">Voltar</a></p>
     `);
