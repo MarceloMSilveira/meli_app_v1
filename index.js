@@ -31,7 +31,7 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-secret',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
       httpOnly: true,
       sameSite: 'none',
@@ -376,14 +376,26 @@ app.get('/auth/mercadolivre', (req, res) => {
   req.session.meli_oauth_state = state;
   req.session.meli_code_verifier = codeVerifier;
 
-  const authUrl = buildMeliAuthUrl(state, codeChallenge);
-  console.log('Auth URL:', authUrl);
-  res.redirect(authUrl);
+  req.session.save((err) => {
+    if (err) {
+      console.error('Erro ao salvar sessão:', err);
+      return res.status(500).send('Erro ao iniciar autenticação.');
+    }
+
+    const authUrl = buildMeliAuthUrl(state, codeChallenge);
+    console.log('Auth URL:', authUrl);
+    res.redirect(authUrl);
+  });
 });
 
 app.get('/auth', async (req, res) => {
   try {
     const { code, state, error } = req.query;
+
+    console.log('--- PKCE STEP 2 ---');
+    console.log('SESSION ID:', req.sessionID);
+    console.log('STATE recebido:', state);
+    console.log('STATE salvo na sessão:', req.session.meli_oauth_state);
 
     if (error) {
       return res.status(400).send(`Autorização recusada ou falhou: ${error}`);
@@ -396,9 +408,10 @@ app.get('/auth', async (req, res) => {
     if (!state || state !== req.session.meli_oauth_state) {
       return res.status(400).send('State inválido.');
     }
-    console.log('--- PKCE STEP 2 ---');
-    console.log('Session code_verifier:', req.session.meli_code_verifier);
+
     const codeVerifier = req.session.meli_code_verifier;
+
+    console.log('code_verifier da sessão:', codeVerifier);
 
     if (!codeVerifier) {
       return res.status(400).send('Code verifier ausente na sessão.');
@@ -409,6 +422,7 @@ app.get('/auth', async (req, res) => {
     try {
       tokenData = await exchangeCodeForToken(code, codeVerifier);
     } finally {
+      // limpeza de sessão (boa prática)
       delete req.session.meli_oauth_state;
       delete req.session.meli_code_verifier;
     }
@@ -430,9 +444,8 @@ app.get('/auth', async (req, res) => {
 
     await saveOrUpdateAccount(account);
 
-    res.render('success', {
-      account
-    });
+    res.render('success', { account });
+
   } catch (err) {
     console.error(err);
     res.status(500).send(`Erro no callback OAuth: ${err.message}`);
