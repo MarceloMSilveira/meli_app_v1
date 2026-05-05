@@ -27,11 +27,13 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+app.set('trust proxy', 1);
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-secret',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       httpOnly: true,
       sameSite: 'none',
@@ -370,6 +372,7 @@ app.get('/auth/mercadolivre', (req, res) => {
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
   console.log('--- PKCE STEP 1 ---');
+  console.log('Session ID ao iniciar:', req.sessionID); // 👈 aqui
   console.log('code_verifier:', codeVerifier);
   console.log('code_challenge:', codeChallenge);
 
@@ -382,6 +385,8 @@ app.get('/auth/mercadolivre', (req, res) => {
       return res.status(500).send('Erro ao iniciar autenticação.');
     }
 
+    console.log('State salvo:', state); // 👈 aqui (dentro do save, garante que já foi persistido)
+
     const authUrl = buildMeliAuthUrl(state, codeChallenge);
     console.log('Auth URL:', authUrl);
     res.redirect(authUrl);
@@ -393,7 +398,7 @@ app.get('/auth', async (req, res) => {
     const { code, state, error } = req.query;
 
     console.log('--- PKCE STEP 2 ---');
-    console.log('SESSION ID:', req.sessionID);
+    console.log('SESSION ID NO CALLBACK:', req.sessionID);
     console.log('STATE recebido:', state);
     console.log('STATE salvo na sessão:', req.session.meli_oauth_state);
 
