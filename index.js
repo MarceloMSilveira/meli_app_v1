@@ -69,7 +69,8 @@ function buildMeliAuthUrl(state, codeChallenge) {
     redirect_uri: process.env.ML_REDIRECT_URI,
     state,
     code_challenge: codeChallenge,
-    code_challenge_method: 'S256'
+    code_challenge_method: 'S256',
+    prompt: 'login'  // 👈 força nova autenticação
   });
 
   return `https://auth.mercadolivre.com.br/authorization?${params.toString()}`;
