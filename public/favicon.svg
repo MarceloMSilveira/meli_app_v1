@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="44" fill="#1A1A18"/>
+  <path d="M100 30 A70 70 0 1 1 30 100" fill="none" stroke="#FFE600" stroke-width="18" stroke-linecap="round"/>
+  <polygon points="25,78 25,118 58,98" fill="#FFE600"/>
+  <text x="100" y="142" text-anchor="middle" font-family="'Sora', Georgia, sans-serif" font-size="90" font-weight="700" fill="#FFE600">M</text>
+</svg>
