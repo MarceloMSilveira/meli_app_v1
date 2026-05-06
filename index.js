@@ -317,7 +317,10 @@ async function getItemDetails(accessToken, itemId) {
   return {
     item_id: item.id,
     title: item.title,
-    price: item.price
+    price: item.price,
+    listing_type_id: item.listing_type_id,
+    free_shipping: item.shipping?.free_shipping ?? null,
+    shipping_mode: item.shipping?.mode ?? null
   };
 }
 
