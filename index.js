@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import express from 'express';
-import session from 'express-session';
+//import session from 'express-session';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,20 +29,27 @@ app.use(express.json());
 
 app.set('trust proxy', 1);
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || 'dev-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true
-    }
-  })
-);
+// app.use(
+//   session({
+//     secret: process.env.SESSION_SECRET || 'dev-secret',
+//     resave: false,
+//     saveUninitialized: false,
+//     cookie: {
+//       httpOnly: true,
+//       sameSite: 'none',
+//       secure: true
+//     }
+//   })
+// );
 
-
+// ============================================
+// 👇 NOVO: função para limpar states expirados
+// ============================================
+async function cleanExpiredPkceStates() {
+  await pool.query(
+    "DELETE FROM oauth_pkce WHERE created_at < NOW() - INTERVAL '10 minutes'"
+  );
+}
 
 function base64UrlEncode(buffer) {
   return buffer
@@ -365,42 +372,35 @@ app.get('/', async (req, res) => {
   }
 });
 
-app.get('/auth/mercadolivre', (req, res) => {
+app.get('/auth/mercadolivre', async (req, res) => {
   const state = crypto.randomUUID();
-
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
-  console.log('--- PKCE STEP 1 ---');
-  console.log('Session ID ao iniciar:', req.sessionID); // 👈 aqui
-  console.log('code_verifier:', codeVerifier);
-  console.log('code_challenge:', codeChallenge);
+  try {
+    await pool.query(
+      'INSERT INTO oauth_pkce (state, code_verifier) VALUES ($1, $2)',
+      [state, codeVerifier]
+    );
+  } catch (error) {
+    console.error(`Erro ao tentar inserir codigo de verificação no banco de dados: ${error.message}`)
+    return res.status(500).send(`Erro ao tentar inserir codigo de verificação no banco de dados: ${error.message}`)
+  }
 
-  req.session.meli_oauth_state = state;
-  req.session.meli_code_verifier = codeVerifier;
+  const authUrl = buildMeliAuthUrl(state, codeChallenge);
+  console.log('Auth URL:', authUrl);
+  res.redirect(authUrl);
 
-  req.session.save((err) => {
-    if (err) {
-      console.error('Erro ao salvar sessão:', err);
-      return res.status(500).send('Erro ao iniciar autenticação.');
-    }
-
-    console.log('State salvo:', state); // 👈 aqui (dentro do save, garante que já foi persistido)
-
-    const authUrl = buildMeliAuthUrl(state, codeChallenge);
-    console.log('Auth URL:', authUrl);
-    res.redirect(authUrl);
-  });
 });
 
 app.get('/auth', async (req, res) => {
   try {
     const { code, state, error } = req.query;
 
-    console.log('--- PKCE STEP 2 ---');
-    console.log('SESSION ID NO CALLBACK:', req.sessionID);
-    console.log('STATE recebido:', state);
-    console.log('STATE salvo na sessão:', req.session.meli_oauth_state);
+    // console.log('--- PKCE STEP 2 ---');
+    // console.log('SESSION ID NO CALLBACK:', req.sessionID);
+    // console.log('STATE recebido:', state);
+    // console.log('STATE salvo na sessão:', req.session.meli_oauth_state);
 
     if (error) {
       return res.status(400).send(`Autorização recusada ou falhou: ${error}`);
@@ -410,27 +410,40 @@ app.get('/auth', async (req, res) => {
       return res.status(400).send('Código de autorização ausente.');
     }
 
-    if (!state || state !== req.session.meli_oauth_state) {
+    if (!state) {
       return res.status(400).send('State inválido.');
     }
 
-    const codeVerifier = req.session.meli_code_verifier;
+    //const codeVerifier = req.session.meli_code_verifier;
 
-    console.log('code_verifier da sessão:', codeVerifier);
+    // 👇 NOVO: busca e já deleta o state do banco (evita reuso)
+    // 👇 REMOVIDO: if (!state || state !== req.session.meli_oauth_state)
+    let result = []
+    try {
+      result = await pool.query(
+        'DELETE FROM oauth_pkce WHERE state = $1 RETURNING code_verifier',
+        [state]
+      );
+    } catch (error) {
+      console.error(`Erro ao tentar pegar estado e deletar do bd: ${error.message}`)
+      return res.status(500).send(`Erro ao tentar pegar estado e deletar do bd: ${error.message}`)
+    }
+
+    //console.log('code_verifier da sessão:', codeVerifier);
+
+     if (!result.rows.length) {
+      return res.status(400).send('State inválido ou expirado.');
+    }
+
+    // 👇 NOVO: vem do banco agora
+    // 👇 REMOVIDO: const codeVerifier = req.session.meli_code_verifier
+    const codeVerifier = result.rows[0].code_verifier;
 
     if (!codeVerifier) {
       return res.status(400).send('Code verifier ausente na sessão.');
     }
 
-    let tokenData;
-
-    try {
-      tokenData = await exchangeCodeForToken(code, codeVerifier);
-    } finally {
-      // limpeza de sessão (boa prática)
-      delete req.session.meli_oauth_state;
-      delete req.session.meli_code_verifier;
-    }
+    const tokenData = await exchangeCodeForToken(code, codeVerifier);
 
     const userData = await getMeliUserMe(tokenData.access_token);
 
