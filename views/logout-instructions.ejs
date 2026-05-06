@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conta conectada — MeliSync</title>
+  <title>Conectar nova conta — MeliSync</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -31,7 +31,6 @@
       height: 60px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
     }
 
     .topbar-left {
@@ -71,79 +70,73 @@
       padding: 0 1.5rem;
     }
 
-    .success-card {
-      background: var(--dark);
-      border-radius: 20px;
-      padding: 2.5rem 2rem;
-      text-align: center;
-      margin-bottom: 1rem;
+    .page-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 6px;
     }
 
-    .success-icon {
-      width: 64px;
-      height: 64px;
-      background: var(--yellow);
+    .page-sub {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 1.75rem;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 1.75rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--card-bg);
+      border-radius: 14px;
+      border: 0.5px solid var(--border);
+      padding: 1.1rem 1.25rem;
+    }
+
+    .step-num {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
       border-radius: 50%;
+      background: var(--yellow);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 1.25rem;
-      font-size: 28px;
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
       font-weight: 700;
       color: var(--dark);
     }
 
-    .success-title {
+    .step-content strong {
+      display: block;
       font-family: 'Sora', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--yellow);
-      margin-bottom: 8px;
-    }
-
-    .success-sub {
       font-size: 14px;
-      color: #777;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 3px;
     }
 
-    .info-card {
-      background: var(--card-bg);
-      border-radius: 14px;
-      border: 0.5px solid var(--border);
-      padding: 0 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 14px 0;
-      border-bottom: 0.5px solid var(--border);
-    }
-
-    .info-row:last-child { border-bottom: none; }
-
-    .info-label {
+    .step-content span {
       font-size: 13px;
       color: var(--text-muted);
     }
 
-    .info-value {
-      font-family: 'Sora', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--dark);
-    }
-
-    .actions {
+    .cta {
       display: flex;
+      flex-direction: column;
       gap: 10px;
-      margin-top: 0.5rem;
     }
 
-    .btn-primary {
-      flex: 1;
+    .btn-dark {
       background: var(--dark);
       color: var(--yellow);
       font-family: 'Sora', sans-serif;
@@ -151,17 +144,35 @@
       font-weight: 600;
       border: none;
       border-radius: 12px;
-      padding: 14px;
+      padding: 15px;
       cursor: pointer;
       text-decoration: none;
       text-align: center;
+      display: block;
       transition: opacity 0.15s;
     }
 
-    .btn-primary:hover { opacity: 0.85; }
+    .btn-dark:hover { opacity: 0.85; }
+
+    .btn-yellow {
+      background: var(--yellow);
+      color: var(--dark);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 12px;
+      padding: 15px;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      display: block;
+      transition: opacity 0.15s;
+    }
+
+    .btn-yellow:hover { opacity: 0.85; }
 
     .btn-ghost {
-      flex: 1;
       background: transparent;
       color: var(--text-muted);
       font-family: 'Sora', sans-serif;
@@ -169,10 +180,11 @@
       font-weight: 500;
       border: 0.5px solid var(--border);
       border-radius: 12px;
-      padding: 14px;
+      padding: 15px;
       cursor: pointer;
       text-decoration: none;
       text-align: center;
+      display: block;
       transition: background 0.15s;
     }
 
@@ -200,38 +212,37 @@
 
   <main class="main">
 
-    <div class="success-card">
-      <div class="success-icon">✓</div>
-      <p class="success-title">Conta conectada!</p>
-      <p class="success-sub">Tudo certo, já pode sincronizar</p>
+    <p class="page-title">Conectar nova conta</p>
+    <p class="page-sub">Para trocar de conta no Mercado Livre, siga os passos abaixo:</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <strong>Abra o Mercado Livre</strong>
+          <span>Acesse mercadolivre.com.br em uma nova aba</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <strong>Faça logout</strong>
+          <span>Clique no seu nome → Sair da conta</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <strong>Volte aqui e continue</strong>
+          <span>Clique no botão abaixo para prosseguir com a nova conta</span>
+        </div>
+      </div>
     </div>
 
-    <div class="info-card">
-      <div class="info-row">
-        <span class="info-label">Usuário</span>
-        <span class="info-value"><%= account.nickname %></span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">ID Mercado Livre</span>
-        <span class="info-value"><%= account.meli_user_id %></span>
-      </div>
-      <% if (account.email) { %>
-      <div class="info-row">
-        <span class="info-label">E-mail</span>
-        <span class="info-value"><%= account.email %></span>
-      </div>
-      <% } %>
-      <% if (account.country_id && account.site_id) { %>
-      <div class="info-row">
-        <span class="info-label">País / Site</span>
-        <span class="info-value"><%= account.country_id %> · <%= account.site_id %></span>
-      </div>
-      <% } %>
-    </div>
-
-    <div class="actions">
-      <a href="/" class="btn-primary">Ver contas</a>
-      <a href="/auth/mercadolivre" class="btn-ghost">Conectar outra</a>
+    <div class="cta">
+      <a href="https://www.mercadolivre.com.br" target="_blank" class="btn-dark">Abrir Mercado Livre</a>
+      <a href="/auth/mercadolivre?skip=1" class="btn-yellow">Já fiz logout — continuar →</a>
+      <a href="/" class="btn-ghost">Cancelar</a>
     </div>
 
   </main>

@@ -2,126 +2,395 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <title>Integração Mercado Livre</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MeliSync — MS1 Softwares</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --yellow: #FFE600;
+      --dark: #1A1A18;
+      --bg: #FFFDF7;
+      --card-bg: #ffffff;
+      --border: #E8E6DE;
+      --text-muted: #888888;
+      --green-bg: #EAFAE8;
+      --green-text: #2A7A1A;
+      --green-dot: #3DAA28;
     }
-    .card { border: 1px solid #ccc; padding: 16px; border-radius: 8px; margin-bottom: 16px; }
-    .btn {
-      display: inline-flex;
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      color: var(--dark);
+    }
+
+    /* TOPBAR */
+    .topbar {
+      background: var(--yellow);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
       align-items: center;
-      justify-content: center;
-      padding: 10px 14px;
-      min-width: 220px;
-      height: 42px;
-      font-size: 14px;
-      border-radius: 6px;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .topbar-logo {
+      font-family: 'Sora', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .topbar-logo-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--dark);
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .topbar-by {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      color: var(--dark);
+      opacity: 0.5;
+    }
+
+    .topbar-btn {
+      background: var(--dark);
+      color: var(--yellow);
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
       border: none;
+      border-radius: 24px;
+      padding: 10px 20px;
       cursor: pointer;
       text-decoration: none;
-      color: white;
-      font: inherit;
-    }
-    .muted { color: #666; }
-    .btn-danger {
-      background: #dc3545;
-      color: white;
-      border: none;
-      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.15s;
     }
 
-    .btn-danger:hover {
-      background: #bb2d3b;
+    .topbar-btn:hover { opacity: 0.85; }
+
+    /* MAIN */
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
     }
 
-    .actions {
+    /* HERO */
+    .hero {
+      background: var(--dark);
+      border-radius: 16px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 2rem;
       display: flex;
-      gap: 10px;
-      margin-top: 10px;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .actions form {
-      margin: 0;
+    .hero-text h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--yellow);
+      margin-bottom: 6px;
     }
 
-    .btn-success {
-      background: #28a745;
+    .hero-text p {
+      font-size: 13px;
+      color: var(--text-muted);
     }
 
-    .btn-success:hover {
-      background: #218838;
+    .hero-stat-num {
+      font-family: 'Sora', sans-serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--yellow);
+      line-height: 1;
+      text-align: right;
     }
 
-    .btn-warning {
-      background: #c58f00;
+    .hero-stat-label {
+      font-size: 12px;
+      color: #666;
+      text-align: right;
+      margin-top: 4px;
     }
 
-    .btn-warning:hover {
-      background: #a37500;
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+
+    .empty-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--yellow);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.25rem;
+      font-size: 28px;
+    }
+
+    .empty-state h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 8px;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
     }
 
     .btn-primary {
-      background: #3483fa;
+      background: var(--dark);
+      color: var(--yellow);
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 28px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.15s;
     }
 
-    .btn-primary:hover {
-      background: #2968c8;
+    .btn-primary:hover { opacity: 0.85; }
+
+    /* ACCOUNTS GRID */
+    .section-title {
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
     }
 
+    .accounts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .account-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      border: 0.5px solid var(--border);
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .account-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .account-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--yellow);
+    }
+
+    .account-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--yellow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 10px;
+    }
+
+    .account-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark);
+      margin-bottom: 3px;
+    }
+
+    .account-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .account-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--green-bg);
+      color: var(--green-text);
+      font-size: 11px;
+      font-weight: 500;
+      border-radius: 20px;
+      padding: 4px 10px;
+      margin-bottom: 14px;
+    }
+
+    .badge-dot {
+      width: 5px;
+      height: 5px;
+      background: var(--green-dot);
+      border-radius: 50%;
+    }
+
+    .account-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sync {
+      flex: 1;
+      background: var(--yellow);
+      color: var(--dark);
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-sync:hover { opacity: 0.85; }
+
+    .btn-remove {
+      background: transparent;
+      color: var(--text-muted);
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-remove:hover {
+      background: #fff0f0;
+      color: #c0392b;
+      border-color: #f5c6c6;
+    }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 12px;
+      color: #bbb;
+    }
   </style>
 </head>
 <body>
-  <h1>Integração com Mercado Livre</h1>
 
-  <div class="actions">
-    <a class="btn btn-primary" href="/auth/mercadolivre">
-      Conectar nova conta Mercado Livre
-    </a>
-  </div>
-  <p class="muted">
-    Para conectar uma conta diferente, abra em uma janela anônima.
-  </p>
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">
+        <span class="topbar-logo-dot"></span>
+        MeliSync
+      </div>
+      <span class="topbar-by">by MS1 Softwares</span>
+    </div>
+    <a href="/auth/mercadolivre" class="topbar-btn">+ Nova conta</a>
+  </header>
 
-  <h2>Contas conectadas</h2>
+  <main class="main">
 
-  <% if (!accounts.length) { %>
-    <p class="muted">Nenhuma conta conectada ainda.</p>
-  <% } %>
-
-  <% accounts.forEach(account => { %>
-    <div class="card">
-      <h3><%= account.nickname || 'Sem nickname' %></h3>
-      <p><strong>User ID:</strong> <%= account.meli_user_id %></p>
-      <p><strong>Email:</strong> <%= account.email || 'não informado' %></p>
-      <p><strong>País:</strong> <%= account.country_id || '-' %></p>
-      <p><strong>Site:</strong> <%= account.site_id || '-' %></p>
-      <p><strong>Expira em:</strong> <%= account.expires_at %></p>
-      
-      <p>
-        <a href="/accounts/<%= account.meli_user_id %>/test">
-          Testar /users/me com refresh automático
-        </a>
-      </p>
-
-      <div class="actions">
-        <form action="/accounts/<%= account.meli_user_id %>/sync-google-sheet" method="post">
-          <button type="submit" class="btn btn-success">
-            Enviar produtos para Google Sheets
-          </button>
-        </form>
-
-        <form method="POST" action="/accounts/<%= account.meli_user_id %>/disconnect">
-          <button 
-            class="btn btn-warning"
-            type="submit"
-            onclick="return confirm('Tem certeza que deseja desconectar esta conta do Mercado Livre?')"
-          >
-            Desconectar
-          </button>
-        </form>
+    <div class="hero">
+      <div class="hero-text">
+        <h1>Contas conectadas</h1>
+        <p>Gerencie suas contas do Mercado Livre</p>
+      </div>
+      <div>
+        <div class="hero-stat-num"><%= accounts.length %></div>
+        <div class="hero-stat-label">conta<%= accounts.length !== 1 ? 's' : '' %> ativa<%= accounts.length !== 1 ? 's' : '' %></div>
       </div>
     </div>
-  <% }) %>
+
+    <% if (accounts.length === 0) { %>
+      <div class="empty-state">
+        <div class="empty-icon">🔗</div>
+        <h2>Nenhuma conta conectada</h2>
+        <p>Conecte sua primeira conta do Mercado Livre para começar</p>
+        <a href="/auth/mercadolivre" class="btn-primary">+ Conectar conta</a>
+      </div>
+    <% } else { %>
+      <p class="section-title">Suas contas</p>
+      <div class="accounts-grid">
+        <% accounts.forEach(account => { %>
+          <div class="account-card">
+            <div class="account-avatar">
+              <%= account.nickname ? account.nickname.slice(0,2).toUpperCase() : '??' %>
+            </div>
+            <p class="account-name"><%= account.nickname %></p>
+            <p class="account-id">ID: <%= account.meli_user_id %></p>
+            <div class="account-badge">
+              <span class="badge-dot"></span> Ativo
+            </div>
+            <div class="account-actions">
+              <form action="/accounts/<%= account.meli_user_id %>/sync-google-sheet" method="POST" style="flex:1;">
+                <button type="submit" class="btn-sync" style="width:100%;">Sincronizar</button>
+              </form>
+              <form action="/accounts/<%= account.meli_user_id %>/disconnect" method="POST">
+                <button type="submit" class="btn-remove">Remover</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+  </main>
+
+  <footer class="footer">
+    MeliSync · MS1 Softwares
+  </footer>
+
 </body>
 </html>
