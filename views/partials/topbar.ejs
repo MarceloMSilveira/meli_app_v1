@@ -1,0 +1,19 @@
+<header class="topbar">
+  <div class="topbar-left">
+    <div class="topbar-logo">
+      <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
+        <rect width="200" height="200" rx="44" fill="#1A1A18"/>
+        <path d="M100 36 A64 64 0 1 1 36 100" fill="none" stroke="#FFE600" stroke-width="18" stroke-linecap="round"/>
+        <polygon points="31,78 31,116 62,97" fill="#FFE600"/>
+        <text x="100" y="122" text-anchor="middle" font-family="'Sora', Georgia, sans-serif" font-size="66" font-weight="700" fill="#FFE600">M</text>
+      </svg>
+      <div class="topbar-logo-text">
+        <span>MeliSync</span><span>for GDA</span>
+      </div>
+    </div>
+    <span class="topbar-by">by MS1 Softwares</span>
+  </div>
+  <% if (typeof topbarBtn !== 'undefined' && topbarBtn) { %>
+    <a href="<%= topbarBtn.href %>" class="topbar-btn"><%= topbarBtn.label %></a>
+  <% } %>
+</header>

@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MeliSync for GDA — MS1 Softwares</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
+  <%- include('partials/head', { title: 'MeliSync for GDA — MS1 Softwares' }) %>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,7 +24,6 @@
       color: var(--dark);
     }
 
-    /* TOPBAR */
     .topbar {
       background: var(--yellow);
       padding: 0 2rem;
@@ -89,14 +84,12 @@
 
     .topbar-btn:hover { opacity: 0.85; }
 
-    /* MAIN */
     .main {
       max-width: 860px;
       margin: 0 auto;
       padding: 2rem 1.5rem;
     }
 
-    /* HERO */
     .hero {
       background: var(--dark);
       border-radius: 16px;
@@ -136,7 +129,6 @@
       margin-top: 4px;
     }
 
-    /* EMPTY STATE */
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
@@ -187,7 +179,6 @@
 
     .btn-primary:hover { opacity: 0.85; }
 
-    /* ACCOUNTS GRID */
     .section-title {
       font-family: 'Sora', sans-serif;
       font-size: 13px;
@@ -316,7 +307,6 @@
       border-color: #f5c6c6;
     }
 
-    /* FOOTER */
     .footer {
       text-align: center;
       padding: 2rem;
@@ -324,29 +314,10 @@
       color: #bbb;
     }
   </style>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-<link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png" />
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">
-        <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
-          <rect width="200" height="200" rx="44" fill="#1A1A18"/>
-          <path d="M100 36 A64 64 0 1 1 36 100" fill="none" stroke="#FFE600" stroke-width="18" stroke-linecap="round"/>
-          <polygon points="31,78 31,116 62,97" fill="#FFE600"/>
-          <text x="100" y="122" text-anchor="middle" font-family="'Sora', Georgia, sans-serif" font-size="66" font-weight="700" fill="#FFE600">M</text>
-        </svg>
-        <div class="topbar-logo-text">
-          <span>MeliSync</span><span>for GDA</span>
-        </div>
-      </div>
-      <span class="topbar-by">by MS1 Softwares</span>
-    </div>
-    <a href="/auth/mercadolivre" class="topbar-btn">+ Nova conta</a>
-  </header>
+  <%- include('partials/topbar', { topbarBtn: { href: '/auth/mercadolivre', label: '+ Nova conta' } }) %>
 
   <main class="main">
 
@@ -396,9 +367,7 @@
 
   </main>
 
-  <footer class="footer">
-    MeliSync · MS1 Softwares
-  </footer>
+  <%- include('partials/footer') %>
 
 </body>
 </html>
