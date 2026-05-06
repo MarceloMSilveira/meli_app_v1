@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MeliSync — MS1 Softwares</title>
+  <title>MeliSync for GDA — MS1 Softwares</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet" />
   <style>
@@ -57,12 +57,10 @@
       gap: 8px;
     }
 
-    .topbar-logo-dot {
-      width: 8px;
-      height: 8px;
-      background: var(--dark);
-      border-radius: 50%;
-      display: inline-block;
+    .topbar-logo-text {
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
     }
 
     .topbar-by {
@@ -326,17 +324,21 @@
       color: #bbb;
     }
   </style>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicon-180x180.png" />
 </head>
 <body>
 
   <header class="topbar">
     <div class="topbar-left">
       <div class="topbar-logo">
-        <span class="topbar-logo-dot"></span>
-        MeliSync
+        <svg width="32" height="32" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block;flex-shrink:0;">
+          <rect width="200" height="200" rx="44" fill="#1A1A18"/>
+          <path d="M100 36 A64 64 0 1 1 36 100" fill="none" stroke="#FFE600" stroke-width="18" stroke-linecap="round"/>
+          <polygon points="31,78 31,116 62,97" fill="#FFE600"/>
+          <text x="100" y="122" text-anchor="middle" font-family="'Sora', Georgia, sans-serif" font-size="66" font-weight="700" fill="#FFE600">M</text>
+        </svg>
+        <div class="topbar-logo-text">
+          <span>MeliSync</span><span>for GDA</span>
+        </div>
       </div>
       <span class="topbar-by">by MS1 Softwares</span>
     </div>
