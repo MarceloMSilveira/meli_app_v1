@@ -373,6 +373,24 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/auth/mercadolivre', async (req, res) => {
+  
+  // 👇 mostra página de instrução antes de iniciar o OAuth
+  const skipInstructions = req.query.skip === '1';
+
+  if (!skipInstructions) {
+    return res.send(`
+      <h2>Antes de conectar uma nova conta</h2>
+      <p>Para conectar uma conta diferente do Mercado Livre, você precisa:</p>
+      <ol>
+        <li>Fazer logout do Mercado Livre no seu browser</li>
+        <li>Ou usar uma aba anônima</li>
+      </ol>
+      <a href="/auth/mercadolivre?skip=1">Já fiz logout, continuar →</a>
+      &nbsp;|&nbsp;
+      <a href="https://www.mercadolivre.com.br/logout" target="_blank">Fazer logout do ML agora</a>
+    `);
+  }
+  
   const state = crypto.randomUUID();
   const codeVerifier = generateCodeVerifier();
   const codeChallenge = generateCodeChallenge(codeVerifier);
@@ -389,10 +407,7 @@ app.get('/auth/mercadolivre', async (req, res) => {
 
   const authUrl = buildMeliAuthUrl(state, codeChallenge);
   console.log('Auth URL:', authUrl);
-  // 👇 redireciona para logout do ML primeiro, que depois volta para o authUrl
-  const logoutUrl = `https://www.mercadolivre.com.br/logout?go=${encodeURIComponent(authUrl)}`;
-
-  res.redirect(logoutUrl);
+  res.redirect(authUrl)
 
 });
 
