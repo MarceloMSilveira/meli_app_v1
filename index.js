@@ -387,7 +387,7 @@ app.get('/auth/mercadolivre', async (req, res) => {
       </ol>
       <a href="/auth/mercadolivre?skip=1">Já fiz logout, continuar →</a>
       &nbsp;|&nbsp;
-      <a href="https://www.mercadolivre.com.br/logout" target="_blank">Fazer logout do ML agora</a>
+      <a href="https://www.mercadolivre.com.br" target="_blank">Abrir Mercado Livre para fazer logout</a>
     `);
   }
   
