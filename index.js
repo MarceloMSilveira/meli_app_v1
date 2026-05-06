@@ -378,17 +378,7 @@ app.get('/auth/mercadolivre', async (req, res) => {
   const skipInstructions = req.query.skip === '1';
 
   if (!skipInstructions) {
-    return res.send(`
-      <h2>Antes de conectar uma nova conta</h2>
-      <p>Para conectar uma conta diferente do Mercado Livre, você precisa:</p>
-      <ol>
-        <li>Fazer logout do Mercado Livre no seu browser</li>
-        <li>Ou usar uma aba anônima</li>
-      </ol>
-      <a href="/auth/mercadolivre?skip=1">Já fiz logout, continuar →</a>
-      &nbsp;|&nbsp;
-      <a href="https://www.mercadolivre.com.br" target="_blank">Abrir Mercado Livre para fazer logout</a>
-    `);
+    return res.render('logout-instructions');
   }
   
   const state = crypto.randomUUID();
