@@ -383,13 +383,16 @@ app.get('/auth/mercadolivre', async (req, res) => {
       [state, codeVerifier]
     );
   } catch (error) {
-    console.error(`Erro ao tentar inserir codigo de verificação no banco de dados: ${error.message}`)
+    console.error(`Erro ao tentar inserir codigo de verificação (pkce) no banco de dados: ${error.message}`)
     return res.status(500).send(`Erro ao tentar inserir codigo de verificação no banco de dados: ${error.message}`)
   }
 
   const authUrl = buildMeliAuthUrl(state, codeChallenge);
   console.log('Auth URL:', authUrl);
-  res.redirect(authUrl);
+  // 👇 redireciona para logout do ML primeiro, que depois volta para o authUrl
+  const logoutUrl = `https://www.mercadolivre.com.br/logout?go=${encodeURIComponent(authUrl)}`;
+
+  res.redirect(logoutUrl);
 
 });
 
