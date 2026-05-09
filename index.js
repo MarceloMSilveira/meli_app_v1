@@ -376,12 +376,21 @@ async function getItemDetails(accessToken, itemId, userId) {
 async function buildProductsPayload(accessToken, userId) {
   const itemIds = await getSellerItemIds(accessToken, userId);
 
-  if (!itemIds.length) {
-    return [];
+  if (!itemIds.length) return [];
+
+  const results = [];
+  const chunkSize = 5; // processa 5 por vez
+
+  for (let i = 0; i < itemIds.length; i += chunkSize) {
+    const chunk = itemIds.slice(i, i + chunkSize);
+    const items = await Promise.all(
+      chunk.map(itemId => getItemDetails(accessToken, itemId, userId))
+    );
+    results.push(...items);
+    console.log(`Processados: ${results.length}/${itemIds.length}`);
   }
 
-  const items = await Promise.all(itemIds.map(itemId => getItemDetails(accessToken, itemId, userId)));
-  return items;
+  return results;
 }
 
 async function sendProductsToAppsScript(products) {
@@ -533,9 +542,10 @@ app.get('/auth', async (req, res) => {
 
 app.get('/accounts/:meliUserId/test', async (req, res) => {
   try {
+    let accessToken = ''
     const { meliUserId } = req.params;
     try {
-      const accessToken = await getValidAccessTokenForUser(meliUserId);
+      accessToken = await getValidAccessTokenForUser(meliUserId);
     } catch (err) {
       if (err.message.includes('refresh_token')) {
         return res.send('Sua sessão expirou. Por favor, reconecte sua conta.');
@@ -557,41 +567,6 @@ app.get('/accounts/:meliUserId/test', async (req, res) => {
     res.status(500).send(err.message);
   }
 });
-
-//rota para sincronizar com google sheets
-//retornando json:
-// app.post('/accounts/:meliUserId/sync-google-sheet', async (req, res) => {
-//   try {
-//     const { meliUserId } = req.params;
-
-//     const accessToken = await getValidAccessTokenForUser(meliUserId);
-
-//     const products = await buildProductsPayload(accessToken, meliUserId);
-
-//     if (!products.length) {
-//       return res.status(200).json({
-//         ok: true,
-//         message: 'Nenhum produto encontrado para enviar.',
-//         quantity: 0
-//       });
-//     }
-
-//     const appsScriptResult = await sendProductsToAppsScript(products);
-
-//     return res.status(200).json({
-//       ok: true,
-//       message: 'Produtos enviados para o Google Sheets com sucesso.',
-//       quantity: products.length,
-//       appsScriptResult
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({
-//       ok: false,
-//       message: err.message
-//     });
-//   }
-// });
 
 //retornando html:
 app.post('/accounts/:meliUserId/sync-google-sheet', async (req, res) => {
