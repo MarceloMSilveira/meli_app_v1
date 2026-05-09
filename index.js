@@ -359,16 +359,34 @@ async function getItemShippingCost(accessToken, userId, item) {
   }
 }
 
+const listingTypeCache = {}; // cache em memória
+
+async function getSaleFeePercentage(accessToken, listingTypeId) {
+  if (listingTypeCache[listingTypeId] !== undefined) {
+    return listingTypeCache[listingTypeId];
+  }
+
+  try {
+    const data = await mlApiFetch(`/sites/MLB/listing_types/${listingTypeId}`, accessToken);
+    const percentage = data?.configuration?.sale_fee_criteria?.percentage_of_fee_amount ?? null;
+    listingTypeCache[listingTypeId] = percentage;
+    return percentage;
+  } catch {
+    return null;
+  }
+}
+
 async function getItemDetails(accessToken, itemId, userId) {
   const item = await mlApiFetch(`/items/${itemId}`, accessToken);
 
- const [shipping_cost, listingType] = await Promise.all([
+  const [shipping_cost, saleFeePercentage] = await Promise.all([
     getItemShippingCost(accessToken, userId, item),
-    mlApiFetch(`/sites/MLB/listing_types/${item.listing_type_id}`, accessToken)
-      .catch(() => null)
+    getSaleFeePercentage(accessToken, item.listing_type_id)
   ]);
 
-  console.log('LISTING TYPE RESPONSE:', JSON.stringify(listingType, null, 2)); // 👈 temporário
+  const sale_fee = saleFeePercentage !== null
+    ? parseFloat((item.price * saleFeePercentage / 100).toFixed(2))
+    : null;
 
   return {
     item_id: item.id,
@@ -378,7 +396,7 @@ async function getItemDetails(accessToken, itemId, userId) {
     free_shipping: item.shipping?.free_shipping ?? null,
     shipping_mode: item.shipping?.mode ?? null,
     shipping_cost,
-    sale_fee: null
+    sale_fee
   };
 }
 
