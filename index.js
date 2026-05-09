@@ -307,8 +307,29 @@ async function mlApiFetch(path, accessToken) {
 }
 
 async function getSellerItemIds(accessToken, userId) {
-  const data = await mlApiFetch(`/users/${userId}/items/search`, accessToken);
-  return data.results || [];
+  const limit = 50;
+  let offset = 0;
+  let allIds = [];
+
+  while (true) {
+    const data = await mlApiFetch(
+      `/users/${userId}/items/search?limit=${limit}&offset=${offset}`,
+      accessToken
+    );
+
+    const ids = data.results || [];
+    allIds = allIds.concat(ids);
+
+    const total = data.paging?.total ?? 0;
+
+    console.log(`Buscando itens: ${allIds.length}/${total}`);
+
+    if (allIds.length >= total || ids.length === 0) break;
+
+    offset += limit;
+  }
+
+  return allIds;
 }
 
 async function getItemDetails(accessToken, itemId) {
