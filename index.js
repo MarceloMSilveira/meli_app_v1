@@ -351,6 +351,8 @@ async function getItemShippingCost(accessToken, userId, item) {
       accessToken
     );
     // retorna o menor custo disponível entre as opções
+    console.log('SHIPPING RESPONSE:', JSON.stringify(data, null, 2)); // 👈 adiciona isso
+
     const costs = data.coverage?.all_country?.list || [];
     return costs.length ? costs[0].price : null;
   } catch {
