@@ -360,14 +360,15 @@ async function getItemShippingCost(accessToken, userId, item) {
 }
 
 async function getItemDetails(accessToken, itemId, userId) {
-  const [item, fees] = await Promise.all([
-    mlApiFetch(`/items/${itemId}`, accessToken),
-    mlApiFetch(`/items/${itemId}/fees`, accessToken)
-  ]);
-  
-  const shipping_cost = await getItemShippingCost(accessToken, userId, item);
+  const item = await mlApiFetch(`/items/${itemId}`, accessToken);
 
-  console.log('FEES RESPONSE:', JSON.stringify(fees, null, 2)); // 👈 temporário
+  const [shipping_cost, benchmark] = await Promise.all([
+    getItemShippingCost(accessToken, userId, item),
+    mlApiFetch(`/marketplace/benchmarks/items/${itemId}/details`, accessToken)
+      .catch(() => null)  // não quebra se falhar
+  ]);
+
+  console.log('BENCHMARK RESPONSE:', JSON.stringify(benchmark, null, 2)); // 👈 temporário
 
   return {
     item_id: item.id,
@@ -377,7 +378,7 @@ async function getItemDetails(accessToken, itemId, userId) {
     free_shipping: item.shipping?.free_shipping ?? null,
     shipping_mode: item.shipping?.mode ?? null,
     shipping_cost,
-    sale_fee: null // 👈 preenchemos depois de ver o log
+    sale_fee: benchmark?.costs?.selling_fees ?? null  // ajustamos depois de ver o log
   };
 }
 
