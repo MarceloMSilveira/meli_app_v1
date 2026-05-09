@@ -332,8 +332,35 @@ async function getSellerItemIds(accessToken, userId) {
   return allIds;
 }
 
-async function getItemDetails(accessToken, itemId) {
+async function getItemShippingCost(accessToken, userId, item) {
+  const params = new URLSearchParams({
+    dimensions: item.shipping?.dimensions
+      ? `${item.shipping.dimensions.height}x${item.shipping.dimensions.width}x${item.shipping.dimensions.length},${item.shipping.dimensions.weight}`
+      : '10x10x10,500',             // fallback se não tiver dimensões
+    item_price: item.price,
+    listing_type_id: item.listing_type_id,
+    mode: item.shipping?.mode || 'me2',
+    condition: item.condition,
+    logistic_type: item.shipping?.logistic_type || 'drop_off',
+    free_shipping: true             // simulamos como frete grátis para obter o custo
+  });
+
+  try {
+    const data = await mlApiFetch(
+      `/users/${userId}/shipping_options/free?${params.toString()}`,
+      accessToken
+    );
+    // retorna o menor custo disponível entre as opções
+    const costs = data.coverage?.all_country?.list || [];
+    return costs.length ? costs[0].price : null;
+  } catch {
+    return null;  // se falhar, não quebra o fluxo
+  }
+}
+
+async function getItemDetails(accessToken, itemId, userId) {
   const item = await mlApiFetch(`/items/${itemId}`, accessToken);
+  const shipping_cost = await getItemShippingCost(accessToken, userId, item);
 
   return {
     item_id: item.id,
@@ -341,7 +368,8 @@ async function getItemDetails(accessToken, itemId) {
     price: item.price,
     listing_type_id: item.listing_type_id,
     free_shipping: item.shipping?.free_shipping ?? null,
-    shipping_mode: item.shipping?.mode ?? null
+    shipping_mode: item.shipping?.mode ?? null,
+    shipping_cost
   };
 }
 
@@ -352,7 +380,7 @@ async function buildProductsPayload(accessToken, userId) {
     return [];
   }
 
-  const items = await Promise.all(itemIds.map(itemId => getItemDetails(accessToken, itemId)));
+  const items = await Promise.all(itemIds.map(itemId => getItemDetails(accessToken, itemId, userId)));
   return items;
 }
 
